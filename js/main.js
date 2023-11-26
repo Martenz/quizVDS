@@ -158,7 +158,7 @@ function printContent(el){
   $('#loader-para').show();
   enable_quiz_buttons_sequenziale();
   setTimeout(function(){
-    $('#loader-para').fadeOut('slow')
+    $('#loader-para').fadeOut('slow');
     $("html, body").animate({ scrollTop: currentscrollpos }, 500);
   },2000);
 
@@ -344,7 +344,7 @@ function enable_quiz_buttons_sequenziale(){
         // doing nothing already tried.
       }
 
-    })
+    });
 
 }
 
@@ -389,7 +389,7 @@ $(document).ready(
                enable_quiz_buttons();
               });
               reset_quiz_esame();
-            })
+            });
 
             $('.esame_quiz_genera').on('click',function(){
               $('#esame-tabella tbody').empty();
@@ -439,7 +439,7 @@ $(document).ready(
               reset_quiz_sequenziale();
               enable_quiz_buttons_sequenziale();
               //$('#argomento-tabella').DataTable();
-            })
+            });
           });
         });
 
@@ -554,7 +554,7 @@ function tick() {
     // now change the display
     $('.count_down').each(function(){
       $(this).html(message);
-    })
+    });
     //timeDisplay.innerHTML = message;
 
     // stop if down to zero
