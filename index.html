@@ -79,7 +79,7 @@
           <div class="no-print mobile" id="recap_errors_esame_mobile" >
             <div class="card_mobile">
               <div class="card_body_mobile">
-                <input type="number" name="nquiz" min="1" max="100" value=30 >
+                <input type="number" name="nquiz" min="1" value=30 >
                 <button class="btn btn-info esame_quiz_genera" data-toggle="tooltip" title="Rigenera il Quiz"><i class="fas fa-random"></i></button>
                 <div class="inline"><span class="" id="risposte_corrette_esame_mobile">0</span><span><i class="fas fa-check-circle"></i></span></div>
                 <div class="inline"><span class="" id="risposte_errate_esame_mobile">0</span><span><i class="fas fa-times-circle"></i></span></div>
@@ -96,7 +96,7 @@
               <h5 class="card-header">Risposte</h5>
               <div class="card-body">
                 <button class="btn btn-info esame_quiz_genera" data-toggle="tooltip" title="Rigenera il Quiz"><i class="fas fa-random"></i>Genera</button>
-                <input type="number" name="nquiz" min="1" max="100" value=30 >
+                <input type="number" name="nquiz" min="1" value=30 >
                 <hr></hr>
                 <div class=""><span class="btn btn-success" id="risposte_corrette_esame">0</span><span>corrette</span></div>
                 <div class=""><span class="btn btn-warning" id="risposte_errate_esame">0</span><span>errate</span></div>
@@ -112,9 +112,10 @@
 
           <div class="col-lg-10 mx-auto" id="quiz_esame">
           <h2>TEST ESAME VDS - 30 domande casuali (default)</h2>
-          <!--<h4>cambiando il numero delle domande casuali non verra' rispettato il numero corretto di domande per argomento -->
-          <button type="button" class="btn btn-dark btn-sm" data-toggle="modal" data-target=".bd-example-modal-sm"><i class="fas fa-info-circle"> punteggi</i></button></h4>
-          <input type="checkbox" name="deltaplano" value="hang"> Deltaplano<br>
+          <!--cambiando il numero delle domande casuali non verra' rispettato il numero corretto di domande per argomento -->
+          <button type="button" class="btn btn-dark btn-sm" data-toggle="modal" data-target=".bd-example-modal-sm"><i class="fas fa-info-circle"> punteggi</i></button>
+          <input type="checkbox" id="quiz_esame_rnd" name="quiz_esame_rnd" checked> <label for="quiz_esame_rnd">Ordine casuale</label>
+          <input type="checkbox" id="quiz_esame_delta" name="quiz_esame_delta"/> <label for="quiz_esame_delta">Deltaplano</label><br>
           <hr></hr>
     		    <table id="esame-tabella" class="display stripe" style="width:100%">
             <thead>
@@ -179,6 +180,9 @@
         </div>
         <div class="col-lg-10 mx-auto" id="quiz_sequenziale">
           <h2>TEST ESAME VDS -  <span id="argomento-selezionato"></span> - Tutte le domande</h2>
+          <input type="checkbox" id="quiz_seq_rnd" name="quiz_seq_rnd" checked> <label for="quiz_seq_rnd">Ordine casuale</label>
+          <input type="checkbox" id="quiz_seq_delta" name="quiz_seq_delta"/> <label for="quiz_seq_delta">Deltaplano</label><br/>
+          <hr/></hr>
     		   <div>
     		    <table id="argomento-tabella" class="display stripe" style="width:100%">
             <thead>

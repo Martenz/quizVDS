@@ -53,34 +53,44 @@ function esame_quiz_genera(sqldb,success){
   //load data to table
 
   var nquiz = $('input[name="nquiz"]').val();
+  var delta = $('#quiz_esame_delta').is(":checked");
+  var random = $('#quiz_esame_rnd').is(":checked");
   quiz_esame_nq = nquiz;
   minutes = nquiz;
 
   //if 30 then use the rules for exam see (http://www.deltaclubdolada.it/wp-content/uploads/VDS_QUIZ.pdf)
+  var query;
   if (nquiz == 30){
-    if (  $('input[name="deltaplano"]').is(":checked") ){
-      var query = "select * from quiz_esame_30;";
+    let order = (random ? " ORDER BY RANDOM();" : ";");
+    if (delta){
+      query = "select * from quiz_esame_30" + order;
       console.log('using quiz_esame_30 view (full quiz for hangglider)');
     }else{
-      var query = "select * from quiz_esame_30_para;";
+      query = "select * from quiz_esame_30_para" + order;
       console.log('using quiz_esame_30_para view (quiz for paragliding)');
     }
   }else{
-    var query = "select * from quiz WHERE quiz_id IN (SELECT quiz_id FROM quiz ORDER BY RANDOM() LIMIT "+nquiz.toString()+") order by quiz_id;";
+    let where = "quiz_id IN (SELECT quiz_id FROM quiz ORDER BY RANDOM() LIMIT "+nquiz.toString()+")";
+    if (!delta)
+      where += " AND hang_para = \"para\"";
+    let order = (random ? "RANDOM()" : "quiz_id");
+    query = "select * from quiz WHERE " + where + " ORDER BY " + order + ";";
   }
   var res = sqldb.exec(query);
 
   tot_points = 0;
 
   $.each(res[0].values,function(key,val){
+    let choices = ['<li index="1" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[3].toString()+'</div></li>',
+		   '<li index="2" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>',
+		   '<li index="3" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li>'];
+    if (random)
+      choices.sort(function(a, b) { return Math.random() < 0.5; });
     $('#esame-tabella tbody').append('\
       <tr>\
       <td><b>'+val[0].toString()+'</b></td>\
       <td class="border-left"><code>'+val[2].toString()+'</code>\
-      <ol done="no">\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[3].toString()+'</div></li>\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li></ol>\
+      <ol done="no">'+choices.join('')+'</ol>\
       </td>\
       </tr>\
       ');
@@ -96,21 +106,31 @@ function esame_quiz_genera(sqldb,success){
 
 }
 
-function loadQuestions(sqldb,argomento,success){
+function loadQuestions(sqldb,success){
+  var argomento = $('#argomento-selezionato').text();
+  var delta = $('#quiz_seq_delta').is(":checked");
+  var random = $('#quiz_seq_rnd').is(":checked");
+
   //load data to table
-  var query = "select * from quiz where sezione='"+argomento+"' order by quiz_id ;";
+  var where = "where sezione='"+argomento+"'";
+  if (!delta)
+    where += " AND hang_para = \"para\"";
+  var order = "ORDER BY " + (random ? "RANDOM()" : "quiz_id");
+  var query = "select * from quiz "+where+" "+order;
   //console.log(query);
   var res = sqldb.exec(query);
 
   $.each(res[0].values,function(key,val){
+    let choices = ['<li index="1" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[3].toString()+'</div></li>',
+		   '<li index="2" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>',
+		   '<li index="3" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li>'];
+    if (random)
+      choices.sort(function(a, b) { return Math.random() < 0.5; });
     $('#argomento-tabella tbody').append('\
       <tr>\
       <td><b>'+val[0].toString()+'</b></td>\
       <td class="border-left"><code>'+val[2].toString()+'</code>\
-      <ol done="no">\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[3].toString()+'</div></li>\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li></ol>\
+      <ol done="no">'+choices.join('')+'</ol>\
       </td>\
       </tr>\
       ');
@@ -147,7 +167,7 @@ function printContent(el){
   $('#loader-para').show();
   enable_quiz_buttons_sequenziale();
   setTimeout(function(){
-    $('#loader-para').fadeOut('slow')
+    $('#loader-para').fadeOut('slow');
     $("html, body").animate({ scrollTop: currentscrollpos }, 500);
   },2000);
 
@@ -156,6 +176,7 @@ function printContent(el){
 function reset_quiz_sequenziale(){
   $('#argomento-tabella li div.btn').removeClass('btn-warning');
   $('#argomento-tabella li div.btn').removeClass('btn-success');
+  $('#argomento-tabella li div.btn').removeClass('wrong_answer');
   $('#argomento-tabella li div.btn').addClass('btn-light');
 
   $('#risposte_corrette').html('0');
@@ -175,6 +196,7 @@ function reset_quiz_sequenziale(){
 function reset_quiz_esame(){
   $('#esame-tabella li div.btn').removeClass('btn-warning');
   $('#esame-tabella li div.btn').removeClass('btn-success');
+  $('#esame-tabella li div.btn').removeClass('wrong_answer');
   $('#esame-tabella li div.btn').addClass('btn-light');
 
   $('#risposte_corrette_esame').html('0');
@@ -253,7 +275,7 @@ function enable_quiz_buttons(){
 
       if ($(this).parent().parent().attr('done')!='yes'){
         //event.preventDefault();
-        var index = $(this).parent('li').index() +1;
+        var index = $(this).parent().attr('index');
         var check = $(this).parent().attr('correct');
         var q_points = parseInt($(this).parent().attr('points'));
         //console.log(index);
@@ -294,12 +316,12 @@ function findCorrect(elem){
   //console.log(elem[0]);
   $(elem[0]).find('div.btn').removeClass('btn-light');
   $(elem[0]).find('div.btn').addClass('btn-warning');
-  var correct = $(elem[0]).find('li')[0].getAttribute('correct') -1;
+  var correct = $(elem[0]).find('li')[0].getAttribute('correct');
   //console.log(correct);
-  $($(elem[0]).find('div.btn')[correct]).removeClass('btn-warning');
-  $($(elem[0]).find('div.btn')[correct]).addClass('btn-success');
+  $(elem[0]).find('li[index="'+correct+'"]').find('div.btn').removeClass('btn-warning');
+  $(elem[0]).find('li[index="'+correct+'"]').find('div.btn').addClass('btn-success');
 
-  $($(elem[0])).closest('tr').attr('print_errors','true');
+  $(elem[0]).closest('tr').attr('print_errors','true');
 }
 
 function enable_quiz_buttons_sequenziale(){
@@ -307,7 +329,7 @@ function enable_quiz_buttons_sequenziale(){
 
       if ($(this).parent().parent().attr('done')!='yes'){
         //event.preventDefault();
-        var index = $(this).parent('li').index() +1;
+        var index = $(this).parent().attr('index');
         var check = $(this).parent().attr('correct');
         //console.log(index);
         //console.log(check);
@@ -322,6 +344,7 @@ function enable_quiz_buttons_sequenziale(){
           //alert('SOMARO');
           $(this).removeClass('btn-light');
           $(this).addClass('btn-warning');
+          $(this).addClass('wrong_answer');
           $('#risposte_errate').html( parseInt($('#risposte_errate').html())+1 );
           $('#risposte_errate_mobile').html( parseInt($('#risposte_errate_mobile').html())+1 );
           findCorrect($(this).parent().parent());
@@ -333,7 +356,7 @@ function enable_quiz_buttons_sequenziale(){
         // doing nothing already tried.
       }
 
-    })
+    });
 
 }
 
@@ -378,33 +401,40 @@ $(document).ready(
                enable_quiz_buttons();
               });
               reset_quiz_esame();
-            })
+            });
 
-            $('.esame_quiz_genera').on('click',function(){
+            var regenerateQuizEsame = function() {
               $('#esame-tabella tbody').empty();
               esame_quiz_genera(sqldb,function(){
                //after loading data to table
               });
               reset_quiz_esame();
               enable_quiz_buttons();
-            });
+            };
 
-            $('input[name="deltaplano"]').change(function() {
-              $('#esame-tabella tbody').empty();
-              esame_quiz_genera(sqldb,function(){
-               //after loading data to table
+            $('.esame_quiz_genera').on('click', regenerateQuizEsame);
+            $('#quiz_esame_rnd').change(regenerateQuizEsame);
+            $('#quiz_esame_delta').change(regenerateQuizEsame);
+
+            var regenerateQuizSequenziale = function() {
+              $('#argomento-tabella tbody').empty();
+              loadQuestions(sqldb,function(){
+		//after loading data to table
               });
-              reset_quiz_esame();
-              enable_quiz_buttons();
-            });
+              reset_quiz_sequenziale();
+              enable_quiz_buttons_sequenziale();
+            };
+
+	    $('#quiz_seq_rnd').change(regenerateQuizSequenziale);
+	    $('#quiz_seq_delta').change(regenerateQuizSequenziale);
 
             $('.argomento').on('click',function(){
 
               $('#loader-para').fadeIn('slow');
 
-              var argomento = $(this).find('.argomento-titolo').html();
+              var argomento = $(this).find('.argomento-titolo').text();
               $('#test-seq').hide();
-              $('#argomento-selezionato').html( argomento );
+              $('#argomento-selezionato').text( argomento );
               $('#test-seq').fadeToggle(2000);
               $('html, body').animate({
                 scrollTop: $("#test-seq").offset().top
@@ -412,14 +442,14 @@ $(document).ready(
 
               // quiz sequenziale
               $('#argomento-tabella tbody').empty();
-              loadQuestions(sqldb,argomento,function(){
+              loadQuestions(sqldb,function(){
                 //after loading data to table
                 $('#loader-para').fadeOut('slow');
               });
               reset_quiz_sequenziale();
               enable_quiz_buttons_sequenziale();
               //$('#argomento-tabella').DataTable();
-            })
+            });
           });
         });
 
@@ -534,7 +564,7 @@ function tick() {
     // now change the display
     $('.count_down').each(function(){
       $(this).html(message);
-    })
+    });
     //timeDisplay.innerHTML = message;
 
     // stop if down to zero
