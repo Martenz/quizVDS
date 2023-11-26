@@ -53,12 +53,13 @@ function esame_quiz_genera(sqldb,success){
   //load data to table
 
   var nquiz = $('input[name="nquiz"]').val();
+  var delta = $('#quiz_esame_delta').is(":checked");
   quiz_esame_nq = nquiz;
   minutes = nquiz;
 
   //if 30 then use the rules for exam see (http://www.deltaclubdolada.it/wp-content/uploads/VDS_QUIZ.pdf)
   if (nquiz == 30){
-    if (  $('input[name="deltaplano"]').is(":checked") ){
+    if (delta){
       var query = "select * from quiz_esame_30;";
       console.log('using quiz_esame_30 view (full quiz for hangglider)');
     }else{
@@ -66,7 +67,10 @@ function esame_quiz_genera(sqldb,success){
       console.log('using quiz_esame_30_para view (quiz for paragliding)');
     }
   }else{
-    var query = "select * from quiz WHERE quiz_id IN (SELECT quiz_id FROM quiz ORDER BY RANDOM() LIMIT "+nquiz.toString()+") order by quiz_id;";
+    var where = "quiz_id IN (SELECT quiz_id FROM quiz ORDER BY RANDOM() LIMIT "+nquiz.toString()+")";
+    if (!delta)
+      where += " AND hang_para = \"para\"";
+    var query = "select * from quiz WHERE " + where + " order by quiz_id;";
   }
   var res = sqldb.exec(query);
 
@@ -389,7 +393,7 @@ $(document).ready(
               enable_quiz_buttons();
             });
 
-            $('input[name="deltaplano"]').change(function() {
+            $('#quiz_esame_delta').change(function() {
               $('#esame-tabella tbody').empty();
               esame_quiz_genera(sqldb,function(){
                //after loading data to table
