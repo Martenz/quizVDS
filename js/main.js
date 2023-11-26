@@ -54,24 +54,27 @@ function esame_quiz_genera(sqldb,success){
 
   var nquiz = $('input[name="nquiz"]').val();
   var delta = $('#quiz_esame_delta').is(":checked");
+  var random = $('#quiz_esame_rnd').is(":checked");
   quiz_esame_nq = nquiz;
   minutes = nquiz;
 
   //if 30 then use the rules for exam see (http://www.deltaclubdolada.it/wp-content/uploads/VDS_QUIZ.pdf)
   var query;
   if (nquiz == 30){
+    let order = (random ? " ORDER BY RANDOM();" : ";");
     if (delta){
-      query = "select * from quiz_esame_30;";
+      query = "select * from quiz_esame_30" + order;
       console.log('using quiz_esame_30 view (full quiz for hangglider)');
     }else{
-      query = "select * from quiz_esame_30_para;";
+      query = "select * from quiz_esame_30_para" + order;
       console.log('using quiz_esame_30_para view (quiz for paragliding)');
     }
   }else{
     let where = "quiz_id IN (SELECT quiz_id FROM quiz ORDER BY RANDOM() LIMIT "+nquiz.toString()+")";
     if (!delta)
       where += " AND hang_para = \"para\"";
-    query = "select * from quiz WHERE " + where + " order by quiz_id;";
+    let order = (random ? "RANDOM()" : "quiz_id");
+    query = "select * from quiz WHERE " + where + " ORDER BY " + order + ";";
   }
   var res = sqldb.exec(query);
 
@@ -81,6 +84,8 @@ function esame_quiz_genera(sqldb,success){
     let choices = ['<li index="1" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[3].toString()+'</div></li>',
 		   '<li index="2" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>',
 		   '<li index="3" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li>'];
+    if (random)
+      choices.sort(function(a, b) { return Math.random() < 0.5; });
     $('#esame-tabella tbody').append('\
       <tr>\
       <td><b>'+val[0].toString()+'</b></td>\
@@ -396,23 +401,18 @@ $(document).ready(
               reset_quiz_esame();
             });
 
-            $('.esame_quiz_genera').on('click',function(){
+            var regenerateQuizEsame = function() {
               $('#esame-tabella tbody').empty();
               esame_quiz_genera(sqldb,function(){
                //after loading data to table
               });
               reset_quiz_esame();
               enable_quiz_buttons();
-            });
+            };
 
-            $('#quiz_esame_delta').change(function() {
-              $('#esame-tabella tbody').empty();
-              esame_quiz_genera(sqldb,function(){
-               //after loading data to table
-              });
-              reset_quiz_esame();
-              enable_quiz_buttons();
-            });
+            $('.esame_quiz_genera').on('click', regenerateQuizEsame);
+            $('#quiz_esame_rnd').change(regenerateQuizEsame);
+            $('#quiz_esame_delta').change(regenerateQuizEsame);
 
             var regenerateQuizSequenziale = function() {
               $('#argomento-tabella tbody').empty();
