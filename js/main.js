@@ -335,6 +335,7 @@ function enable_quiz_buttons_sequenziale(){
           //alert('SOMARO');
           $(this).removeClass('btn-light');
           $(this).addClass('btn-warning');
+          $(this).addClass('wrong_answer');
           $('#risposte_errate').html( parseInt($('#risposte_errate').html())+1 );
           $('#risposte_errate_mobile').html( parseInt($('#risposte_errate_mobile').html())+1 );
           findCorrect($(this).parent().parent());
