@@ -176,6 +176,7 @@ function printContent(el){
 function reset_quiz_sequenziale(){
   $('#argomento-tabella li div.btn').removeClass('btn-warning');
   $('#argomento-tabella li div.btn').removeClass('btn-success');
+  $('#argomento-tabella li div.btn').removeClass('wrong_answer');
   $('#argomento-tabella li div.btn').addClass('btn-light');
 
   $('#risposte_corrette').html('0');
@@ -195,6 +196,7 @@ function reset_quiz_sequenziale(){
 function reset_quiz_esame(){
   $('#esame-tabella li div.btn').removeClass('btn-warning');
   $('#esame-tabella li div.btn').removeClass('btn-success');
+  $('#esame-tabella li div.btn').removeClass('wrong_answer');
   $('#esame-tabella li div.btn').addClass('btn-light');
 
   $('#risposte_corrette_esame').html('0');
