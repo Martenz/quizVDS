@@ -78,14 +78,14 @@ function esame_quiz_genera(sqldb,success){
   tot_points = 0;
 
   $.each(res[0].values,function(key,val){
+    let choices = ['<li index="1" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[3].toString()+'</div></li>',
+		   '<li index="2" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>',
+		   '<li index="3" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li>'];
     $('#esame-tabella tbody').append('\
       <tr>\
       <td><b>'+val[0].toString()+'</b></td>\
       <td class="border-left"><code>'+val[2].toString()+'</code>\
-      <ol done="no">\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[3].toString()+'</div></li>\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li></ol>\
+      <ol done="no">'+choices.join('')+'</ol>\
       </td>\
       </tr>\
       ');
@@ -116,14 +116,16 @@ function loadQuestions(sqldb,success){
   var res = sqldb.exec(query);
 
   $.each(res[0].values,function(key,val){
+    let choices = ['<li index="1" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[3].toString()+'</div></li>',
+		   '<li index="2" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>',
+		   '<li index="3" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li>'];
+    if (random)
+      choices.sort(function(a, b) { return Math.random() < 0.5; });
     $('#argomento-tabella tbody').append('\
       <tr>\
       <td><b>'+val[0].toString()+'</b></td>\
       <td class="border-left"><code>'+val[2].toString()+'</code>\
-      <ol done="no">\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[3].toString()+'</div></li>\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>\
-      <li correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li></ol>\
+      <ol done="no">'+choices.join('')+'</ol>\
       </td>\
       </tr>\
       ');
@@ -266,7 +268,7 @@ function enable_quiz_buttons(){
 
       if ($(this).parent().parent().attr('done')!='yes'){
         //event.preventDefault();
-        var index = $(this).parent('li').index() +1;
+        var index = $(this).parent().attr('index');
         var check = $(this).parent().attr('correct');
         var q_points = parseInt($(this).parent().attr('points'));
         //console.log(index);
@@ -307,12 +309,12 @@ function findCorrect(elem){
   //console.log(elem[0]);
   $(elem[0]).find('div.btn').removeClass('btn-light');
   $(elem[0]).find('div.btn').addClass('btn-warning');
-  var correct = $(elem[0]).find('li')[0].getAttribute('correct') -1;
+  var correct = $(elem[0]).find('li')[0].getAttribute('correct');
   //console.log(correct);
-  $($(elem[0]).find('div.btn')[correct]).removeClass('btn-warning');
-  $($(elem[0]).find('div.btn')[correct]).addClass('btn-success');
+  $(elem[0]).find('li[index="'+correct+'"]').find('div.btn').removeClass('btn-warning');
+  $(elem[0]).find('li[index="'+correct+'"]').find('div.btn').addClass('btn-success');
 
-  $($(elem[0])).closest('tr').attr('print_errors','true');
+  $(elem[0]).closest('tr').attr('print_errors','true');
 }
 
 function enable_quiz_buttons_sequenziale(){
@@ -320,7 +322,7 @@ function enable_quiz_buttons_sequenziale(){
 
       if ($(this).parent().parent().attr('done')!='yes'){
         //event.preventDefault();
-        var index = $(this).parent('li').index() +1;
+        var index = $(this).parent().attr('index');
         var check = $(this).parent().attr('correct');
         //console.log(index);
         //console.log(check);
