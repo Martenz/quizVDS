@@ -101,9 +101,15 @@ function esame_quiz_genera(sqldb,success){
 
 }
 
-function loadQuestions(sqldb,argomento,success){
+function loadQuestions(sqldb,success){
+  var argomento = $('#argomento-selezionato').text();
+  var delta = $('#quiz_seq_delta').is(":checked");
+
   //load data to table
-  var query = "select * from quiz where sezione='"+argomento+"' order by quiz_id ;";
+  var where = "where sezione='"+argomento+"'";
+  if (!delta)
+    where += " AND hang_para = \"para\"";
+  var query = "select * from quiz "+where+" order by quiz_id ;";
   //console.log(query);
   var res = sqldb.exec(query);
 
@@ -403,13 +409,22 @@ $(document).ready(
               enable_quiz_buttons();
             });
 
+            $('#quiz_seq_delta').change(function() {
+              $('#argomento-tabella tbody').empty();
+              loadQuestions(sqldb,function(){
+		//after loading data to table
+              });
+              reset_quiz_sequenziale();
+              enable_quiz_buttons_sequenziale();
+            });
+
             $('.argomento').on('click',function(){
 
               $('#loader-para').fadeIn('slow');
 
-              var argomento = $(this).find('.argomento-titolo').html();
+              var argomento = $(this).find('.argomento-titolo').text();
               $('#test-seq').hide();
-              $('#argomento-selezionato').html( argomento );
+              $('#argomento-selezionato').text( argomento );
               $('#test-seq').fadeToggle(2000);
               $('html, body').animate({
                 scrollTop: $("#test-seq").offset().top
@@ -417,7 +432,7 @@ $(document).ready(
 
               // quiz sequenziale
               $('#argomento-tabella tbody').empty();
-              loadQuestions(sqldb,argomento,function(){
+              loadQuestions(sqldb,function(){
                 //after loading data to table
                 $('#loader-para').fadeOut('slow');
               });
