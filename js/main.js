@@ -58,19 +58,20 @@ function esame_quiz_genera(sqldb,success){
   minutes = nquiz;
 
   //if 30 then use the rules for exam see (http://www.deltaclubdolada.it/wp-content/uploads/VDS_QUIZ.pdf)
+  var query;
   if (nquiz == 30){
     if (delta){
-      var query = "select * from quiz_esame_30;";
+      query = "select * from quiz_esame_30;";
       console.log('using quiz_esame_30 view (full quiz for hangglider)');
     }else{
-      var query = "select * from quiz_esame_30_para;";
+      query = "select * from quiz_esame_30_para;";
       console.log('using quiz_esame_30_para view (quiz for paragliding)');
     }
   }else{
-    var where = "quiz_id IN (SELECT quiz_id FROM quiz ORDER BY RANDOM() LIMIT "+nquiz.toString()+")";
+    let where = "quiz_id IN (SELECT quiz_id FROM quiz ORDER BY RANDOM() LIMIT "+nquiz.toString()+")";
     if (!delta)
       where += " AND hang_para = \"para\"";
-    var query = "select * from quiz WHERE " + where + " order by quiz_id;";
+    query = "select * from quiz WHERE " + where + " order by quiz_id;";
   }
   var res = sqldb.exec(query);
 
