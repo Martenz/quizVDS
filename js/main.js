@@ -104,12 +104,14 @@ function esame_quiz_genera(sqldb,success){
 function loadQuestions(sqldb,success){
   var argomento = $('#argomento-selezionato').text();
   var delta = $('#quiz_seq_delta').is(":checked");
+  var random = $('#quiz_seq_rnd').is(":checked");
 
   //load data to table
   var where = "where sezione='"+argomento+"'";
   if (!delta)
     where += " AND hang_para = \"para\"";
-  var query = "select * from quiz "+where+" order by quiz_id ;";
+  var order = "ORDER BY " + (random ? "RANDOM()" : "quiz_id");
+  var query = "select * from quiz "+where+" "+order;
   //console.log(query);
   var res = sqldb.exec(query);
 
@@ -409,14 +411,17 @@ $(document).ready(
               enable_quiz_buttons();
             });
 
-            $('#quiz_seq_delta').change(function() {
+            var regenerateQuizSequenziale = function() {
               $('#argomento-tabella tbody').empty();
               loadQuestions(sqldb,function(){
 		//after loading data to table
               });
               reset_quiz_sequenziale();
               enable_quiz_buttons_sequenziale();
-            });
+            };
+
+	    $('#quiz_seq_rnd').change(regenerateQuizSequenziale);
+	    $('#quiz_seq_delta').change(regenerateQuizSequenziale);
 
             $('.argomento').on('click',function(){
 
