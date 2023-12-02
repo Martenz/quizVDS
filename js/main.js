@@ -22,6 +22,13 @@ var tot_points;
 var quiz_seq_done = 0;
 var quiz_seq_correct = 0;
 
+function shuffle(arr) {
+  for (let i = 1; i < arr.length; ++i) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
 function scrollToDiv(div_id){
   $('html, body').animate({
         scrollTop: $(div_id).offset().top
@@ -85,7 +92,7 @@ function esame_quiz_genera(sqldb,success){
 		   '<li index="2" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>',
 		   '<li index="3" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li>'];
     if (random)
-      choices.sort(function(a, b) { return Math.random() < 0.5; });
+      shuffle(choices);
     $('#esame-tabella tbody').append('\
       <tr>\
       <td><b>'+val[0].toString()+'</b></td>\
@@ -125,7 +132,7 @@ function loadQuestions(sqldb,success){
 		   '<li index="2" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[4].toString()+'</div></li>',
 		   '<li index="3" correct="'+val[6].toString()+'" points="'+val[7].toString()+'"><div class="btn btn-light">'+val[5].toString()+'</div></li>'];
     if (random)
-      choices.sort(function(a, b) { return Math.random() < 0.5; });
+      shuffle(choices);
     $('#argomento-tabella tbody').append('\
       <tr>\
       <td><b>'+val[0].toString()+'</b></td>\
